@@ -8,7 +8,7 @@ no autoplay, and Shorts kept in a view of their own. See [PLAN.md](PLAN.md) for 
 
 ![A 40-second tour: the feed, Shorts, channels, then the player with captions, chapters and a sponsor segment skipped](docs/tour.webp)
 
-<sub>The tour above, in full quality: [subfeed-demo.mp4](https://github.com/ekelly95/subfeed/raw/main/docs/subfeed-demo.mp4) (2.3 MB).</sub>
+<sub>The same tour in full quality: [download the MP4](https://github.com/ekelly95/subfeed/raw/main/docs/subfeed-demo.mp4) (2.3 MB).</sub>
 
 | | |
 |---|---|

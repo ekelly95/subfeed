@@ -89,6 +89,11 @@
   <content_rating type="oars-1.1" />
 
   <releases>
+    <release version="0.1.1" date="2026-10-15">
+      <description>
+        <p>Builds whose yt-dlp is kept current by their store, such as Flathub's, no longer update it themselves.</p>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-10-15">
       <description>
         <p>First release.</p>

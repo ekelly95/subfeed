@@ -141,7 +141,8 @@ fn run(args: &[String]) -> Result<c_int> {
         "--background" => return background(),
         "--update-yt-dlp" => {
             if ytdlp::managed_path().is_none() {
-                println!("yt-dlp belongs to the system here. {}", ytdlp::update_hint(ytdlp::install()));
+                let whose = if in_flatpak() { "comes with this build of subfeed" } else { "belongs to the system" };
+                println!("yt-dlp {whose} here. {}", ytdlp::update_hint(ytdlp::install()));
                 return Ok(0);
             }
             let latest = ytdlp::latest_release()?;

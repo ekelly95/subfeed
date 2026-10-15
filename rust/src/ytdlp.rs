@@ -64,9 +64,11 @@ fn in_flatpak() -> bool {
 }
 
 /// In the Flatpak, subfeed keeps its own yt-dlp here and updates it itself, since the bundled
-/// one only changes with a new Flatpak build. Elsewhere yt-dlp belongs to the system.
+/// one only changes with a new Flatpak build. Elsewhere yt-dlp belongs to the system. A Flatpak
+/// whose yt-dlp is kept current by its store (Flathub) sets SUBFEED_YTDLP_UPDATES=off.
 pub fn managed_path() -> Option<PathBuf> {
-    in_flatpak().then(|| dirs::data_dir().map(|d| d.join("subfeed").join("yt-dlp"))).flatten()
+    let updates_off = std::env::var("SUBFEED_YTDLP_UPDATES").is_ok_and(|v| v == "off");
+    (in_flatpak() && !updates_off).then(|| dirs::data_dir().map(|d| d.join("subfeed").join("yt-dlp"))).flatten()
 }
 
 /// The yt-dlp to run: subfeed's own copy when it has one, else the one on PATH.

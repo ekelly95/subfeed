@@ -5,3 +5,5 @@
 /LOCAL.md
 .flatpak-builder/
 build-dir/
+build-dir-flathub/
+repo-flathub/

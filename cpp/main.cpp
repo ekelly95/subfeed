@@ -2,16 +2,19 @@
 #include <QtCore/QDir>
 #include <QtCore/QFile>
 #include <QtCore/QStandardPaths>
+#include <QtCore/QThreadPool>
 #include <QtCore/QTimer>
 #include <QtDBus/QDBusConnection>
 #include <QtGui/QGuiApplication>
 #include <QtGui/QIcon>
 #include <QtQml/QQmlApplicationEngine>
+#include <QtQuick/QQuickWindow>
 #include <QtQuickControls2/QQuickStyle>
 
 #include "appbus.h"
 
 #include <clocale>
+#include <memory>
 
 // Rust: rust/src/cli.rs. Runs a headless command (--refresh, --import, ...) and returns its
 // exit code, or -1 if there is none and the GUI should start.
@@ -68,11 +71,17 @@ int main(int argc, char *argv[])
                                   QStringLiteral("Save a PNG of the window after a few seconds, then quit (for testing)."),
                                   QStringLiteral("file"));
     parser.addOption(screenshot);
+    QCommandLineOption tour(QStringLiteral("tour"), QStringLiteral("Walk through the app by itself, then quit (for demo recordings)."));
+    parser.addOption(tour);
+    QCommandLineOption record(QStringLiteral("record"),
+                              QStringLiteral("Save the window as numbered JPEG frames, 15 a second, into this folder (with --tour)."),
+                              QStringLiteral("folder"));
+    parser.addOption(record);
     parser.process(app);
 
     // One window: a second launch (or a notification's Play) hands over to the first and exits.
     // Test runs (--smoke, --screenshot) stay separate so they work beside a running subfeed.
-    const bool testRun = parser.isSet(smoke) || parser.isSet(screenshot);
+    const bool testRun = parser.isSet(smoke) || parser.isSet(screenshot) || parser.isSet(tour);
     AppBus appBus;
     if (!testRun) {
         QDBusConnection bus = QDBusConnection::sessionBus();
@@ -96,6 +105,7 @@ int main(int argc, char *argv[])
         {QStringLiteral("openVideoId"), parser.value(open)},
         {QStringLiteral("startInShorts"), parser.isSet(shorts)},
         {QStringLiteral("startInChannels"), parser.isSet(manage)},
+        {QStringLiteral("tour"), parser.isSet(tour)},
         // light|dark regardless of the desktop (KDE ignores an app's own request), for screenshots.
         {QStringLiteral("colorSchemeOverride"), qEnvironmentVariable("SUBFEED_COLOR_SCHEME")},
         {QStringLiteral("screenshotPath"), parser.value(screenshot)},
@@ -107,10 +117,28 @@ int main(int argc, char *argv[])
                      []() { QCoreApplication::exit(1); }, Qt::QueuedConnection);
     engine.loadFromModule("dev.subfeed", "Main");
 
-    if (parser.isSet(smoke) || parser.isSet(screenshot)) {
+    // --record: the app films itself (no screen-capture permission, nothing else on screen).
+    // Frames are grabbed on this thread and written as JPEG on worker threads.
+    if (parser.isSet(record)) {
+        auto *window = qobject_cast<QQuickWindow *>(engine.rootObjects().value(0));
+        const QString dir = parser.value(record);
+        if (window && QDir().mkpath(dir)) {
+            auto *frames = new QTimer(&app);
+            auto count = std::make_shared<int>(0);
+            QObject::connect(frames, &QTimer::timeout, &app, [window, dir, count]() {
+                const QImage image = window->grabWindow();
+                const QString path = QStringLiteral("%1/frame-%2.jpg").arg(dir).arg((*count)++, 5, 10, QLatin1Char('0'));
+                QThreadPool::globalInstance()->start([image, path]() { image.save(path, "JPG", 92); });
+            });
+            frames->start(1000 / 15);
+            QObject::connect(&app, &QCoreApplication::aboutToQuit, []() { QThreadPool::globalInstance()->waitForDone(); });
+        }
+    }
+
+    if (parser.isSet(smoke) || parser.isSet(screenshot) || parser.isSet(tour)) {
         // Safety net: never hang a test run. QML timers run on the animation clock, which can lag
         // real time by a quarter while a video plays, so a player screenshot gets more room.
-        const int limit = !parser.isSet(screenshot) ? 10000 : parser.isSet(open) ? 90000 : 40000;
+        const int limit = parser.isSet(tour) ? 150000 : !parser.isSet(screenshot) ? 10000 : parser.isSet(open) ? 90000 : 40000;
         QTimer::singleShot(limit, &app, []() { QCoreApplication::exit(2); });
     }
     return app.exec();

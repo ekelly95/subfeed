@@ -99,6 +99,7 @@ No Google account and no algorithm: just the channels you follow, newest first, 
 - `cd rust && cargo test`: data, parsing, stream choice, refresh logic, on fixtures (no network).
 - `./build/subfeed --smoke`: the window opens and libmpv initialises.
 - UI checks: run against copies (`SUBFEED_DB=…`, `XDG_CONFIG_HOME=…`) and capture with `--screenshot` (and `--open <id>` for the player). `SUBFEED_SCREENSHOT_SCALE=2` captures at twice the size; the README images (`docs/screenshots/`, WebP at quality 90) come from a demo database of ten public channels, imported from a Takeout-style CSV with its own `XDG_CACHE_HOME`.
+- Demo video (`docs/subfeed-demo.mp4`): `subfeed --tour --record <folder>` walks through the app by itself and saves the window 15 times a second as JPEG frames (the app films itself: no screen-capture permission, nothing else on screen; the window must stay uncovered). Run it on the demo database, measure the real frame rate from the files' times, and encode with ffmpeg (H.264, CRF 20).
 - Video lengths: YouTube's feed has none, so after RSS a refresh makes one yt-dlp `/videos` call per channel that has new videos without a length (at most 10 channels per run, one at a time) and fills lengths only; it never adds videos. `channels.durations_at` remembers the lookup, so a channel is asked again only once newer videos arrive. A fresh 10-channel import: 83 of 83 lengths in a 20 s first refresh. `SUBFEED_TEST_MUTE=1` keeps playback silent while still using the real audio path.
 
 ## Risks

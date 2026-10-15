@@ -6,6 +6,8 @@ no autoplay, and Shorts kept in a view of their own. See [PLAN.md](PLAN.md) for 
 
 ![The feed: the newest video large, "Continue watching" beside it, then everything else newest first](docs/screenshots/feed.webp)
 
+**▶ [Watch the 40-second tour](docs/subfeed-demo.mp4)**: the feed, Shorts, channels, then the player with captions, chapters and a sponsor segment skipped.
+
 | | |
 |---|---|
 | ![The player with chapters, captions and what's next in your feed](docs/screenshots/player.webp) | ![Shorts in their own view, never mixed into the feed](docs/screenshots/shorts.webp) |

@@ -51,6 +51,8 @@ FocusScope {
     }
 
     function focusGrid() { grid.forceActiveFocus() }
+    // For --tour: move the selection like j/k.
+    function moveSelection(step) { grid.move(step) }
 
     // Prefetch: the video the pointer or keyboard has settled on. Launching the app or scrolling
     // past doesn't count, so an idle feed costs no lookups.

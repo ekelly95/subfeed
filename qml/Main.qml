@@ -16,6 +16,8 @@ QQC2.ApplicationWindow {
     property bool startInShorts: false
     // --manage: start on the Channels page.
     property bool startInChannels: false
+    // --tour: walks through the app by itself, then quits (for demo recordings).
+    property bool tour: false
     property string screenshotPath: ""
     property int screenshotScale: 1
     // AppBus (C++): later launches of subfeed hand over to this window.
@@ -252,6 +254,40 @@ QQC2.ApplicationWindow {
         repeat: true
         running: root.screenshotPath === "" && !root.smokeTest
         onTriggered: if (!SystemInfo.onBattery) feedModel.refresh()
+    }
+
+    // The tour: each step's action, then how long to wait before the next (approximate: QML timers
+    // follow the animation clock). The large video is looked up first, so the player opens at once.
+    readonly property var tourSteps: [
+        { wait: 2800, run: () => { if (feedModel.heroJson !== "") feedModel.prefetch(JSON.parse(feedModel.heroJson).videoId) } },
+        { wait: 800, run: () => feedPage.moveSelection(1) },
+        { wait: 800, run: () => feedPage.moveSelection(1) },
+        { wait: 1800, run: () => feedPage.moveSelection(1) },
+        { wait: 3200, run: () => { feedPage.shortsMode = true } },
+        { wait: 1200, run: () => { feedPage.shortsMode = false } },
+        { wait: 3000, run: () => stack.push(channelsComponent) },
+        { wait: 1500, run: () => { stack.pop(); feedPage.focusGrid() } },
+        { wait: 5500, run: () => play(JSON.parse(feedModel.heroJson)) },
+        { wait: 3500, run: () => root.playerPage.toggleCaptions() },
+        // Just before a sponsor segment, to show SponsorBlock skipping it.
+        { wait: 6500, run: () => player.seekTo(Math.max(0, (root.playerPage.skips.length > 0 ? root.playerPage.skips[0].start : 60) - 3)) },
+        { wait: 3500, run: () => root.playerPage.seekChapter(1) },
+        { wait: 2500, run: () => root.playerPage.leave() },
+        { wait: 0, run: () => Qt.quit() },
+    ]
+    property int tourStep: 0
+    Timer {
+        id: tourTimer
+        interval: 1500
+        running: root.tour
+        onTriggered: {
+            const step = root.tourSteps[root.tourStep++]
+            step.run()
+            if (root.tourStep < root.tourSteps.length) {
+                interval = step.wait
+                start()
+            }
+        }
     }
 
     Component.onCompleted: {

@@ -7,3 +7,5 @@
 build-dir/
 build-dir-flathub/
 repo-flathub/
+repo-bundle/
+*.flatpak

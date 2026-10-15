@@ -26,9 +26,11 @@ no autoplay, and Shorts kept in a view of their own. See [PLAN.md](PLAN.md) for 
 - **Keeps working:** when yt-dlp falls behind YouTube, subfeed says so (and the Flatpak updates its own).
 
 ## Install
-subfeed is new; packages are on their way.
-- **Arch Linux:** the AUR package's recipe is in [`packaging/aur`](packaging/aur): `cd packaging/aur && makepkg -si`.
-- **Flatpak:** the manifest is in [`packaging/flatpak`](packaging/flatpak).
+- **Flatpak (any distribution):** download `subfeed.flatpak` from the [latest release](https://github.com/ekelly95/subfeed/releases/latest), then
+  `flatpak install --user subfeed.flatpak` (it pulls the KDE runtime from Flathub if you don't have it).
+  This build keeps its own yt-dlp current; for a new version of subfeed, install the newer file the same way.
+  To build it yourself, see [`packaging/flatpak`](packaging/flatpak).
+- **Arch Linux:** a PKGBUILD is in [`packaging/aur`](packaging/aur): `cd packaging/aur && makepkg -si`.
 - **From source:** below.
 
 ## Build
@@ -70,6 +72,10 @@ Data lives in `$XDG_DATA_HOME/subfeed/subfeed.db` (override with `SUBFEED_DB`), 
 ## Logs
 Some desktops send Qt logs to the journal. To see them in the terminal:
 `QT_FORCE_STDERR_LOGGING=1 QT_LOGGING_RULES="js.debug=true" ./build/subfeed`
+
+## How it was made
+subfeed was written largely with Claude (Anthropic's AI model) through Claude Code, directed,
+reviewed and tested by its author, who uses it daily.
 
 ## License
 GPL-3.0-or-later (see [LICENSE](LICENSE)).

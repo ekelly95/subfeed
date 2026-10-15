@@ -73,7 +73,8 @@ No Google account and no algorithm: just the channels you follow, newest first, 
   - ✅ CI (`.github/workflows/ci.yml`): tests, clippy with warnings as errors, the full build, and the metadata validators, in an Arch container on every push.
   - ✅ App ID `io.github.ekelly95.Subfeed` (the .desktop file, icon, D-Bus service, MPRIS and notifications). Settings moved from `~/.config/subfeed.dev/` to `~/.config/subfeed/` (copied once on first start).
   - ✅ Screenshots (`docs/screenshots/`).
-  - Before going public: rewrite history to drop personal notes from early commits; Flathub submission.
+  - ✅ Public (2026-10-15): history squashed, v0.1.0 and v0.1.1 released; a `.flatpak` file is attached to releases.
+  - Not on Flathub: its rules forbid AI-generated manifests and AI-opened submissions, and want a longer development history. If it's ever submitted, the author writes the manifest and submits it, disclosing the AI-written code. `SUBFEED_YTDLP_UPDATES=off` stays for builds whose store updates yt-dlp.
 - **M4 — integration:** ✅
   - **MPRIS** (`cpp/mpris.*`): registered only while a video is open; title, channel, length, art, position; Play/Pause/Seek/SetPosition/Rate/Volume; Next = next in feed, Previous = restart; Raise/Quit.
   - **No screen blanking while playing** (`cpp/inhibitor.*`): XDG portal Inhibit (idle + suspend), falling back to org.freedesktop.ScreenSaver; released on pause.

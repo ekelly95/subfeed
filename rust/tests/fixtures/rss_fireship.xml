@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Real feed (fetched 2026-10-15), trimmed to three entries with shortened descriptions. -->
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UCsBjURrPoezykLs9EqgamOA"/>
+ <id>yt:channel:sBjURrPoezykLs9EqgamOA</id>
+ <yt:channelId>sBjURrPoezykLs9EqgamOA</yt:channelId>
+ <title>Fireship</title>
+ <link rel="alternate" href="https://www.youtube.com/channel/UCsBjURrPoezykLs9EqgamOA"/>
+ <author>
+  <name>Fireship</name>
+  <uri>https://www.youtube.com/channel/UCsBjURrPoezykLs9EqgamOA</uri>
+ </author>
+ <published>2017-04-07T18:17:23+00:00</published>
+ <entry>
+  <id>yt:video:QZVzuq28eFw</id>
+  <yt:videoId>QZVzuq28eFw</yt:videoId>
+  <yt:channelId>UCsBjURrPoezykLs9EqgamOA</yt:channelId>
+  <title>OpenAI’s lead engineer was secretly a spy...</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=QZVzuq28eFw"/>
+  <author>
+   <name>Fireship</name>
+   <uri>https://www.youtube.com/channel/UCsBjURrPoezykLs9EqgamOA</uri>
+  </author>
+  <published>2026-10-14T17:48:10+00:00</published>
+  <updated>2026-10-14T18:28:55+00:00</updated>
+  <media:group>
+   <media:title>OpenAI’s lead engineer was secretly a spy...</media:title>
+   <media:content url="https://www.youtube.com/v/QZVzuq28eFw?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/QZVzuq28eFw/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Run GitHub Actions 2x faster and build with Codesmith at https://www.blacksmith.sh/
+
+An OpenAI engineer built a wiretap…</media:description>
+   <media:community>
+    <media:starRating count="20273" average="5.00" min="1" max="5"/>
+    <media:statistics views="1232542"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:wajoP_5Cpw8</id>
+  <yt:videoId>wajoP_5Cpw8</yt:videoId>
+  <yt:channelId>UCsBjURrPoezykLs9EqgamOA</yt:channelId>
+  <title>Every app on Earth is now open source... whether it likes it or not</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=wajoP_5Cpw8"/>
+  <author>
+   <name>Fireship</name>
+   <uri>https://www.youtube.com/channel/UCsBjURrPoezykLs9EqgamOA</uri>
+  </author>
+  <published>2026-10-12T19:15:23+00:00</published>
+  <updated>2026-10-13T20:54:46+00:00</updated>
+  <media:group>
+   <media:title>Every app on Earth is now open source... whether it likes it or not</media:title>
+   <media:content url="https://www.youtube.com/v/wajoP_5Cpw8?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/wajoP_5Cpw8/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Every agent needs proper tools. Apify MCP gives yours thousands of them, ready to run. Use code FIRESHIP25 for $25 in…</media:description>
+   <media:community>
+    <media:starRating count="65632" average="5.00" min="1" max="5"/>
+    <media:statistics views="3408581"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:No-JPdFvYWU</id>
+  <yt:videoId>No-JPdFvYWU</yt:videoId>
+  <yt:channelId>UCsBjURrPoezykLs9EqgamOA</yt:channelId>
+  <title>The one OpenAI announcement that can actually make you money...</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=No-JPdFvYWU"/>
+  <author>
+   <name>Fireship</name>
+   <uri>https://www.youtube.com/channel/UCsBjURrPoezykLs9EqgamOA</uri>
+  </author>
+  <published>2026-10-01T19:34:14+00:00</published>
+  <updated>2026-10-08T19:59:46+00:00</updated>
+  <media:group>
+   <media:title>The one OpenAI announcement that can actually make you money...</media:title>
+   <media:content url="https://www.youtube.com/v/No-JPdFvYWU?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/No-JPdFvYWU/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Try the faster, open-weight version of Jev at https://fastino.ai/. Use code: FIRESHIPFIVE to get free credits.
+
+In this…</media:description>
+   <media:community>
+    <media:starRating count="20949" average="5.00" min="1" max="5"/>
+    <media:statistics views="1823186"/>
+   </media:community>
+  </media:group>
+ </entry>
+</feed>

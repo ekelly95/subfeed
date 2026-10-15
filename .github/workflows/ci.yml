@@ -1,0 +1,63 @@
+# Build, test and lint pushes to main and pull requests, in a clean Arch Linux container.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch replaces a run still in progress.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install dependencies
+        run: |
+          pacman -Syu --noconfirm --needed git base-devel cmake ninja rust \
+            qt6-base qt6-declarative kirigami mpvqt mpv libva corrosion extra-cmake-modules \
+            appstream desktop-file-utils
+
+      # Actions are pinned to commits; the comment says which release.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Arch updates Rust often, and build output from another rustc can't be reused, so the
+      # compiler's version is part of the cache key.
+      - name: Rust version
+        id: rust
+        run: echo "version=$(rustc -V | cut -d' ' -f2)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+            build/cargo
+          key: cargo-${{ steps.rust.outputs.version }}-${{ hashFiles('rust/Cargo.lock') }}
+          restore-keys: cargo-${{ steps.rust.outputs.version }}-
+
+      - name: Test the Rust core
+        working-directory: rust
+        run: cargo test --locked
+
+      - name: Lint
+        working-directory: rust
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+      - name: Build the app
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo
+          cmake --build build
+
+      - name: Check app metadata
+        run: |
+          appstreamcli validate --no-net io.github.ekelly95.Subfeed.metainfo.xml
+          desktop-file-validate io.github.ekelly95.Subfeed.desktop

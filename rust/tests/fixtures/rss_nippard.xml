@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Real feed (fetched 2026-10-15), trimmed to one Short and one video with shortened descriptions. -->
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UC68TLK0mAEzUyHx5x5k-S1Q"/>
+ <id>yt:channel:68TLK0mAEzUyHx5x5k-S1Q</id>
+ <yt:channelId>68TLK0mAEzUyHx5x5k-S1Q</yt:channelId>
+ <title>Jeff Nippard</title>
+ <link rel="alternate" href="https://www.youtube.com/channel/UC68TLK0mAEzUyHx5x5k-S1Q"/>
+ <author>
+  <name>Jeff Nippard</name>
+  <uri>https://www.youtube.com/channel/UC68TLK0mAEzUyHx5x5k-S1Q</uri>
+ </author>
+ <published>2014-04-19T22:28:26+00:00</published>
+ <entry>
+  <id>yt:video:JVO00Ulr5BE</id>
+  <yt:videoId>JVO00Ulr5BE</yt:videoId>
+  <yt:channelId>UC68TLK0mAEzUyHx5x5k-S1Q</yt:channelId>
+  <title>The Best &amp; Worst Peptides (Ranked)</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/JVO00Ulr5BE"/>
+  <author>
+   <name>Jeff Nippard</name>
+   <uri>https://www.youtube.com/channel/UC68TLK0mAEzUyHx5x5k-S1Q</uri>
+  </author>
+  <published>2026-10-08T15:41:18+00:00</published>
+  <updated>2026-10-12T03:37:33+00:00</updated>
+  <media:group>
+   <media:title>The Best &amp; Worst Peptides (Ranked)</media:title>
+   <media:content url="https://www.youtube.com/v/JVO00Ulr5BE?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i3.ytimg.com/vi/JVO00Ulr5BE/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Peptides are everywhere, so let’s rank them. Only one is in S tier.
+
+Semaglutide, aka ozempic, works for weight loss by…</media:description>
+   <media:community>
+    <media:starRating count="83262" average="5.00" min="1" max="5"/>
+    <media:statistics views="2485719"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:H6SiAe-VObA</id>
+  <yt:videoId>H6SiAe-VObA</yt:videoId>
+  <yt:channelId>UC68TLK0mAEzUyHx5x5k-S1Q</yt:channelId>
+  <title>Peptides Are Insane</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=H6SiAe-VObA"/>
+  <author>
+   <name>Jeff Nippard</name>
+   <uri>https://www.youtube.com/channel/UC68TLK0mAEzUyHx5x5k-S1Q</uri>
+  </author>
+  <published>2026-09-28T15:30:01+00:00</published>
+  <updated>2026-10-09T02:23:02+00:00</updated>
+  <media:group>
+   <media:title>Peptides Are Insane</media:title>
+   <media:content url="https://www.youtube.com/v/H6SiAe-VObA?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i1.ytimg.com/vi/H6SiAe-VObA/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Download MacroFactor 2 weeks free: https://bit.ly/jeffmacrofactor (use code JEFF)
+
+I have two things that will help you…</media:description>
+   <media:community>
+    <media:starRating count="239308" average="5.00" min="1" max="5"/>
+    <media:statistics views="17420102"/>
+   </media:community>
+  </media:group>
+ </entry>
+</feed>

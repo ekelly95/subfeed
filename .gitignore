@@ -1,0 +1,7 @@
+/build/
+/rust/target/
+/compile_commands.json
+/rust/.qmlls.ini
+/LOCAL.md
+.flatpak-builder/
+build-dir/

@@ -1,0 +1,95 @@
+{
+ "id": "UCsBjURrPoezykLs9EqgamOA",
+ "channel": "Fireship",
+ "channel_id": "UCsBjURrPoezykLs9EqgamOA",
+ "uploader_id": "@Fireship",
+ "title": "Fireship - Videos",
+ "_type": "playlist",
+ "webpage_url": "https://www.youtube.com/channel/UCsBjURrPoezykLs9EqgamOA/videos",
+ "entries": [
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "QZVzuq28eFw",
+   "url": "https://www.youtube.com/watch?v=QZVzuq28eFw",
+   "title": "OpenAI’s lead engineer was secretly a spy...",
+   "duration": 306,
+   "timestamp": 1792004400,
+   "live_status": null,
+   "availability": null,
+   "thumbnails": [
+    {
+     "url": "https://i.ytimg.com/vi/QZVzuq28eFw/hq720_custom_3.jpg?sqp=CJCWwdYG-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLC__oPzpAqpHGQXtp0oPHzUHnQq4g",
+     "height": 404,
+     "width": 720
+    }
+   ]
+  },
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "wajoP_5Cpw8",
+   "url": "https://www.youtube.com/watch?v=wajoP_5Cpw8",
+   "title": "Every app on Earth is now open source... whether it likes it or not",
+   "duration": 356,
+   "timestamp": 1791849600,
+   "live_status": null,
+   "availability": null,
+   "thumbnails": [
+    {
+     "url": "https://i.ytimg.com/vi/wajoP_5Cpw8/hq720_custom_1.jpg?sqp=CJCWwdYG-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLBaIi14XuJpTuMUPZUgscdFzU2n0A",
+     "height": 404,
+     "width": 720
+    }
+   ]
+  },
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "WrCjAAl9okA",
+   "url": "https://www.youtube.com/watch?v=WrCjAAl9okA",
+   "title": "A $6.3 billion open-weight model just got embarrassed by the French...",
+   "duration": 370,
+   "timestamp": 1791417600,
+   "live_status": null,
+   "availability": null,
+   "thumbnails": [
+    {
+     "url": "https://i.ytimg.com/vi/WrCjAAl9okA/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDJcSyrt1ZCHDOQNqnO6kkh2mRs3w",
+     "height": 404,
+     "width": 720
+    }
+   ]
+  },
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "_5p1_TNSWqQ",
+   "url": "https://www.youtube.com/watch?v=_5p1_TNSWqQ",
+   "title": "PewDiePie is setting AI free... and OpenAI is furious",
+   "duration": 346,
+   "timestamp": 1791244800,
+   "live_status": null,
+   "availability": null,
+   "thumbnails": [
+    {
+     "url": "https://i.ytimg.com/vi/_5p1_TNSWqQ/hq720.jpg?sqp=-oaymwEcCNAFEJQDSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLA_RzFwJF96ddg1UYy7hDusCm1-Jw",
+     "height": 404,
+     "width": 720
+    }
+   ]
+  },
+  {
+   "_type": "url",
+   "ie_key": "Youtube",
+   "id": "UpComing123",
+   "url": "https://www.youtube.com/watch?v=UpComing123",
+   "title": "Premiere (upcoming)",
+   "duration": null,
+   "timestamp": null,
+   "live_status": "is_upcoming",
+   "availability": null,
+   "thumbnails": []
+  }
+ ]
+}

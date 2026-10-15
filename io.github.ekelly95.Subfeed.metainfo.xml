@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- What app stores (GNOME Software, KDE Discover, Flathub) show for subfeed. -->
+<component type="desktop-application">
+  <id>io.github.ekelly95.Subfeed</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>subfeed</name>
+  <summary>Your YouTube subscriptions, and nothing else</summary>
+  <developer id="io.github.ekelly95">
+    <name>ekelly95</name>
+  </developer>
+
+  <description>
+    <p>
+      subfeed plays the YouTube channels you follow, newest first, in a quiet player built for the
+      Linux desktop. There's no Google account, no recommendations and no autoplay.
+    </p>
+    <ul>
+      <li>Import your subscriptions from Google Takeout, or add channels by name</li>
+      <li>Shorts stay in a view of their own, never mixed into the feed</li>
+      <li>A keyboard-first player with chapters, captions and resume</li>
+      <li>Save a video's transcript as a Markdown note, ready for Obsidian</li>
+      <li>Battery-friendly: hardware decoding, and quality that follows your power state</li>
+      <li>Media keys, desktop notifications for new videos, and a background refresh</li>
+    </ul>
+    <p>
+      Your subscriptions and history stay in a local database. subfeed is not affiliated with
+      YouTube or Google; it plays public videos through yt-dlp.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.ekelly95.Subfeed.desktop</launchable>
+  <provides>
+    <binary>subfeed</binary>
+  </provides>
+
+  <url type="homepage">https://github.com/ekelly95/subfeed</url>
+  <url type="bugtracker">https://github.com/ekelly95/subfeed/issues</url>
+  <url type="vcs-browser">https://github.com/ekelly95/subfeed</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>The feed: the newest video large, then everything else newest first</caption>
+      <image>https://raw.githubusercontent.com/ekelly95/subfeed/main/docs/screenshots/feed.webp</image>
+    </screenshot>
+    <screenshot>
+      <caption>The player, with chapters, captions and what's next in your feed</caption>
+      <image>https://raw.githubusercontent.com/ekelly95/subfeed/main/docs/screenshots/player.webp</image>
+    </screenshot>
+    <screenshot>
+      <caption>Shorts in a view of their own</caption>
+      <image>https://raw.githubusercontent.com/ekelly95/subfeed/main/docs/screenshots/shorts.webp</image>
+    </screenshot>
+    <screenshot>
+      <caption>First run: import from Google Takeout or add channels by name</caption>
+      <image>https://raw.githubusercontent.com/ekelly95/subfeed/main/docs/screenshots/welcome.webp</image>
+    </screenshot>
+  </screenshots>
+
+  <categories>
+    <category>AudioVideo</category>
+    <category>Video</category>
+    <category>Player</category>
+  </categories>
+  <keywords>
+    <keyword>YouTube</keyword>
+    <keyword>subscriptions</keyword>
+    <keyword>video</keyword>
+    <keyword>feed</keyword>
+  </keywords>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#3daee9</color>
+    <color type="primary" scheme_preference="dark">#0e0f12</color>
+  </branding>
+
+  <requires>
+    <display_length compare="ge">720</display_length>
+  </requires>
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+  <supports>
+    <internet>always</internet>
+  </supports>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="0.1.0" date="2026-10-15">
+      <description>
+        <p>First release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

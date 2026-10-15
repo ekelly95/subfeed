@@ -1,0 +1,211 @@
+{
+ "id": "JVO00Ulr5BE",
+ "title": "The Best & Worst Peptides (Ranked)",
+ "channel": "Jeff Nippard",
+ "channel_id": "UC68TLK0mAEzUyHx5x5k-S1Q",
+ "duration": 108,
+ "live_status": "not_live",
+ "chapters": null,
+ "description": "Peptides are everywhere, so let’s rank them.",
+ "formats": [
+  {
+   "format_id": "140-20",
+   "protocol": "https",
+   "vcodec": "none",
+   "acodec": "mp4a.40.2",
+   "width": null,
+   "height": null,
+   "fps": null,
+   "tbr": 129.532,
+   "dynamic_range": null,
+   "language_preference": 10,
+   "url": "https://example.invalid/140-20",
+   "http_headers": {
+    "User-Agent": "Mozilla/5.0"
+   }
+  },
+  {
+   "format_id": "251-0",
+   "protocol": "https",
+   "vcodec": "none",
+   "acodec": "opus",
+   "width": null,
+   "height": null,
+   "fps": null,
+   "tbr": 119.282,
+   "dynamic_range": null,
+   "language_preference": -1,
+   "url": "https://example.invalid/251-0",
+   "http_headers": {
+    "User-Agent": "Mozilla/5.0"
+   }
+  },
+  {
+   "format_id": "251-20",
+   "protocol": "https",
+   "vcodec": "none",
+   "acodec": "opus",
+   "width": null,
+   "height": null,
+   "fps": null,
+   "tbr": 132.736,
+   "dynamic_range": null,
+   "language_preference": 10,
+   "url": "https://example.invalid/251-20",
+   "http_headers": {
+    "User-Agent": "Mozilla/5.0"
+   }
+  },
+  {
+   "format_id": "134",
+   "protocol": "https",
+   "vcodec": "avc1.4D401E",
+   "acodec": "none",
+   "width": 360,
+   "height": 640,
+   "fps": 30,
+   "tbr": 233.664,
+   "dynamic_range": "SDR",
+   "language_preference": -1,
+   "url": "https://example.invalid/134",
+   "http_headers": {
+    "User-Agent": "Mozilla/5.0"
+   }
+  },
+  {
+   "format_id": "787",
+   "protocol": "https",
+   "vcodec": "av01.0.04M.08",
+   "acodec": "none",
+   "width": 608,
+   "height": 1080,
+   "fps": 30,
+   "tbr": 211.034,
+   "dynamic_range": "SDR",
+   "language_preference": -1,
+   "url": "https://example.invalid/787",
+   "http_headers": {
+    "User-Agent": "Mozilla/5.0"
+   }
+  },
+  {
+   "format_id": "398",
+   "protocol": "https",
+   "vcodec": "av01.0.05M.08",
+   "acodec": "none",
+   "width": 720,
+   "height": 1280,
+   "fps": 30,
+   "tbr": 445.986,
+   "dynamic_range": "SDR",
+   "language_preference": -1,
+   "url": "https://example.invalid/398",
+   "http_headers": {
+    "User-Agent": "Mozilla/5.0"
+   }
+  },
+  {
+   "format_id": "137",
+   "protocol": "https",
+   "vcodec": "avc1.640028",
+   "acodec": "none",
+   "width": 1080,
+   "height": 1920,
+   "fps": 30,
+   "tbr": 1923.085,
+   "dynamic_range": "SDR",
+   "language_preference": -1,
+   "url": "https://example.invalid/137",
+   "http_headers": {
+    "User-Agent": "Mozilla/5.0"
+   }
+  },
+  {
+   "format_id": "399",
+   "protocol": "https",
+   "vcodec": "av01.0.08M.08",
+   "acodec": "none",
+   "width": 1080,
+   "height": 1920,
+   "fps": 30,
+   "tbr": 605.802,
+   "dynamic_range": "SDR",
+   "language_preference": -1,
+   "url": "https://example.invalid/399",
+   "http_headers": {
+    "User-Agent": "Mozilla/5.0"
+   }
+  },
+  {
+   "format_id": "400",
+   "protocol": "https",
+   "vcodec": "av01.0.12M.08",
+   "acodec": "none",
+   "width": 1440,
+   "height": 2560,
+   "fps": 30,
+   "tbr": 1880.072,
+   "dynamic_range": "SDR",
+   "language_preference": -1,
+   "url": "https://example.invalid/400",
+   "http_headers": {
+    "User-Agent": "Mozilla/5.0"
+   }
+  }
+ ],
+ "language": "en-US",
+ "automatic_captions": {
+  "de": [
+   {
+    "ext": "json3",
+    "url": "https://example.invalid/captions/de.json3",
+    "name": "German"
+   },
+   {
+    "ext": "srt",
+    "url": "https://example.invalid/captions/de.srt",
+    "name": "German"
+   },
+   {
+    "ext": "vtt",
+    "url": "https://example.invalid/captions/de.vtt",
+    "name": "German"
+   }
+  ],
+  "en": [
+   {
+    "ext": "json3",
+    "url": "https://example.invalid/captions/en.json3",
+    "name": "English"
+   },
+   {
+    "ext": "srt",
+    "url": "https://example.invalid/captions/en.srt",
+    "name": "English"
+   },
+   {
+    "ext": "vtt",
+    "url": "https://example.invalid/captions/en.vtt",
+    "name": "English"
+   }
+  ],
+  "en-orig": [
+   {
+    "ext": "json3",
+    "url": "https://example.invalid/captions/en-orig.json3",
+    "name": "English (Original)"
+   },
+   {
+    "ext": "srt",
+    "url": "https://example.invalid/captions/en-orig.srt",
+    "name": "English (Original)"
+   },
+   {
+    "ext": "vtt",
+    "url": "https://example.invalid/captions/en-orig.vtt",
+    "name": "English (Original)"
+   }
+  ]
+ },
+ "subtitles": {}
+}

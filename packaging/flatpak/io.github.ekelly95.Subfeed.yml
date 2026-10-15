@@ -1,0 +1,176 @@
+# subfeed as a Flatpak. Build and install locally:
+#   flatpak run org.flatpak.Builder --user --install --force-clean build-dir \
+#     packaging/flatpak/io.github.ekelly95.Subfeed.yml
+# cargo-sources.json comes from rust/Cargo.lock (flatpak-builder-tools' flatpak-cargo-generator.py);
+# regenerate it whenever Cargo.lock changes.
+#
+# mpv and its libraries follow Flathub's Haruna (org.kde.haruna), the KDE runtime's other libmpv app.
+app-id: io.github.ekelly95.Subfeed
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.rust-stable
+command: subfeed
+# Rust for Corrosion's setup and subfeed's core.
+build-options:
+  append-path: /usr/lib/sdk/rust-stable/bin
+
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio
+  - --device=dri
+  # Media keys and the desktop's media widget.
+  - --own-name=org.mpris.MediaPlayer2.subfeed
+  # "3 new videos" notifications.
+  - --talk-name=org.freedesktop.Notifications
+  # Keeping the screen awake falls back to this where the portal can't.
+  - --talk-name=org.freedesktop.ScreenSaver
+  # Battery and power profile, for choosing stream quality; metered networks skip refreshes.
+  - --system-talk-name=org.freedesktop.UPower
+  - --system-talk-name=org.freedesktop.UPower.PowerProfiles
+  - --system-talk-name=net.hadess.PowerProfiles
+  - --system-talk-name=org.freedesktop.NetworkManager
+
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig
+  - /share/man
+  - /share/doc
+  - '*.a'
+  - '*.la'
+
+modules:
+  # --- libmpv and MpvQt (as in Haruna) ---
+  - name: luajit
+    no-autogen: true
+    make-args:
+      - BUILDMODE=dynamic
+      - PREFIX=${FLATPAK_DEST}
+    make-install-args:
+      - PREFIX=${FLATPAK_DEST}
+    cleanup:
+      - /bin
+    sources:
+      - type: git
+        url: https://github.com/openresty/luajit2.git
+        tag: v2.1-20260914
+        commit: ae3d1eecfdbe70b54040779f7b4655e132b9d875
+
+  - name: libplacebo
+    buildsystem: meson
+    config-opts:
+      - -Ddemos=false
+    sources:
+      - type: git
+        url: https://github.com/haasn/libplacebo.git
+        tag: v7.360.1
+        commit: cee9b076f2c63104ccfd497fa79c39a867293ec4
+
+  - name: libass
+    config-opts:
+      - --disable-static
+    sources:
+      - type: archive
+        url: https://github.com/libass/libass/releases/download/0.17.5/libass-0.17.5.tar.gz
+        sha256: caab4b993dd7be6187c55623b789ed75dddefea6e65938af134637c732fe094a
+
+  - name: libmpv
+    buildsystem: meson
+    config-opts:
+      - -Dlibmpv=true
+      - -Dcplayer=false
+      # subfeed draws video through libmpv's render API into its own Qt window, so mpv's own X11
+      # window code (and its libXpresent dependency) isn't needed.
+      - -Dx11=disabled
+      # Guesses the encoding of old local subtitle files; YouTube captions are always UTF-8.
+      - -Duchardet=disabled
+      - -Dlua=enabled
+      - -Ddebug=false
+      - -Dbuild-date=false
+      - -Dalsa=disabled
+      - -Dmanpage-build=disabled
+    sources:
+      - type: archive
+        url: https://github.com/mpv-player/mpv/archive/refs/tags/v0.41.0.tar.gz
+        sha256: ee21092a5ee427353392360929dc64645c54479aefdb5babc5cfbb5fad626209
+
+  - name: mpvqt
+    buildsystem: cmake-ninja
+    sources:
+      - type: archive
+        url: https://download.kde.org/stable/mpvqt/mpvqt-1.2.0.tar.xz
+        sha256: 8660ad79c0d60fed77f29b36e1742841466af5405de702c81a121e6eeb625ebb
+
+  # --- Streams: yt-dlp's official release (it carries its YouTube challenge solver) and Deno,
+  # the JavaScript runtime that solver needs. subfeed can update yt-dlp itself later on. ---
+  - name: yt-dlp
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 yt-dlp ${FLATPAK_DEST}/bin/yt-dlp
+    sources:
+      - type: file
+        url: https://github.com/yt-dlp/yt-dlp/releases/download/2026.08.19/yt-dlp
+        sha256: 1fa6733c37ea6fb51c99ad8fe785e7b7e5f3246c9b980230329d4fb72ed8d4d6
+
+  - name: deno
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 deno ${FLATPAK_DEST}/bin/deno
+    sources:
+      - type: archive
+        only-arches: [x86_64]
+        url: https://github.com/denoland/deno/releases/download/v2.9.7/deno-x86_64-unknown-linux-gnu.zip
+        sha256: c6527f24f4b16031d3ae4fa9f658d5f11534c8d84ce7dc8502420280919c3490
+        strip-components: 0
+      - type: archive
+        only-arches: [aarch64]
+        url: https://github.com/denoland/deno/releases/download/v2.9.7/deno-aarch64-unknown-linux-gnu.zip
+        sha256: c832298b1ad4422481334855f6003e0f54145762c5a134f20a489511d2f65bbf
+        strip-components: 0
+
+  # --- Build tools for subfeed's Rust core ---
+  - name: corrosion
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCORROSION_BUILD_TESTS=OFF
+    cleanup:
+      - '*'
+    sources:
+      - type: git
+        url: https://github.com/corrosion-rs/corrosion.git
+        tag: v0.6.1
+        commit: 1499b14e4906a2890f5cee1547c8848db261753d
+
+  # --- subfeed ---
+  - name: subfeed
+    buildsystem: cmake-ninja
+    builddir: true
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      # No network while building: cxx-qt-cmake and the Rust crates come from the sources below.
+      - -DFETCHCONTENT_FULLY_DISCONNECTED=ON
+      - -DFETCHCONTENT_SOURCE_DIR_CXXQT=/run/build/subfeed/cxx-qt-cmake
+    build-options:
+      env:
+        CARGO_HOME: /run/build/subfeed/cargo
+        CARGO_NET_OFFLINE: 'true'
+    sources:
+      - type: dir
+        path: ../..
+        skip:
+          - build
+          - build-dir
+          - rust/target
+          - .flatpak-builder
+          - .cache
+      - type: git
+        url: https://github.com/kdab/cxx-qt-cmake.git
+        tag: 0.10.0
+        commit: 64e63f560737b3b7f85ef8267c5918e4b8176d5a
+        dest: cxx-qt-cmake
+      - cargo-sources.json

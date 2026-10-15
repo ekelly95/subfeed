@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=subfeed
+GenericName=YouTube Subscriptions
+Comment=Your YouTube subscriptions, newest first, without the distractions
+Exec=subfeed
+Icon=io.github.ekelly95.Subfeed
+Terminal=false
+Categories=AudioVideo;Video;Player;
+Keywords=youtube;video;subscriptions;feed;channels;
+StartupNotify=true
+StartupWMClass=subfeed
+SingleMainWindow=true

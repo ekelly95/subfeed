@@ -1,0 +1,61 @@
+# Maintainer: ekelly95 <313907567+ekelly95@users.noreply.github.com>
+# subfeed from its latest commit. To build from a local checkout instead:
+#   SUBFEED_SOURCE=git+file:///path/to/subfeed makepkg
+pkgname=subfeed-git
+_pkgname=subfeed
+pkgver=r0
+pkgrel=1
+pkgdesc="Your YouTube subscriptions, and nothing else: a distraction-free player for the Linux desktop"
+arch=(x86_64 aarch64)
+url="https://github.com/ekelly95/subfeed"
+license=(GPL-3.0-or-later)
+depends=(
+  qt6-base qt6-declarative kirigami mpvqt mpv libva hicolor-icon-theme
+  # Streams come from yt-dlp, which needs a JavaScript runtime (Deno) to solve YouTube's checks.
+  yt-dlp yt-dlp-ejs deno
+)
+makedepends=(git cmake ninja rust corrosion extra-cmake-modules)
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+# cxx-qt's C++ objects end up in a static library made by Rust's tools, which can't index LTO
+# objects, so the final link would miss them.
+options=(!lto)
+# cxx-qt-cmake would otherwise be downloaded by CMake during build(); pinned to the 0.10.0 tag's commit.
+source=("$_pkgname::${SUBFEED_SOURCE:-git+$url.git}"
+        "cxx-qt-cmake::git+https://github.com/kdab/cxx-qt-cmake.git#commit=64e63f560737b3b7f85ef8267c5918e4b8176d5a")
+sha256sums=(SKIP SKIP)
+
+pkgver() {
+  cd "$_pkgname"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+prepare() {
+  cd "$_pkgname/rust"
+  export CARGO_HOME="$srcdir/cargo-home"
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
+}
+
+build() {
+  export CARGO_HOME="$srcdir/cargo-home"
+  # Everything was fetched in prepare(); nothing may go online from here on.
+  export CARGO_NET_OFFLINE=true
+  # None: makepkg's own compiler flags apply (Arch's CMake packaging convention).
+  cmake -S "$_pkgname" -B build -G Ninja \
+    -DCMAKE_BUILD_TYPE=None \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DFETCHCONTENT_FULLY_DISCONNECTED=ON \
+    -DFETCHCONTENT_SOURCE_DIR_CXXQT="$srcdir/cxx-qt-cmake"
+  cmake --build build
+}
+
+check() {
+  cd "$_pkgname/rust"
+  export CARGO_HOME="$srcdir/cargo-home"
+  export CARGO_NET_OFFLINE=true
+  cargo test --locked --frozen
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+}

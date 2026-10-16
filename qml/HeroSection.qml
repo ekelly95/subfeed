@@ -21,12 +21,17 @@ Item {
 
     implicitHeight: 304
 
+    // The title column never gets narrower than its buttons. When room runs short the picture
+    // gives up width first (down to 440), then "Continue watching" goes.
+    readonly property int textMinWidth: actions.implicitWidth
+    readonly property bool showContinuing: continuing.length > 0 && width >= 440 + 40 + textMinWidth + 40 + 300
+
     RowLayout {
         anchors.fill: parent
         spacing: 40
 
         Item {
-            Layout.preferredWidth: 540
+            Layout.preferredWidth: Math.max(440, Math.min(540, hero.width - 40 - hero.textMinWidth - (hero.showContinuing ? 340 : 0)))
             Layout.fillHeight: true
 
             Image {
@@ -94,6 +99,7 @@ Item {
             // Takes what's left: its long title would otherwise squeeze "Continue watching".
             Layout.fillWidth: true
             Layout.preferredWidth: 0
+            Layout.minimumWidth: hero.textMinWidth
             Layout.alignment: Qt.AlignVCenter
             spacing: 14
 
@@ -127,6 +133,7 @@ Item {
                 elide: Text.ElideRight
             }
             RowLayout {
+                id: actions
                 Layout.topMargin: 10
                 spacing: 10
                 SfButton {
@@ -141,7 +148,7 @@ Item {
 
         ColumnLayout {
             // Only where it fits beside the video and its title.
-            visible: hero.continuing.length > 0 && hero.width >= 1100
+            visible: hero.showContinuing
             Layout.preferredWidth: 300
             Layout.minimumWidth: 300
             Layout.maximumWidth: 300

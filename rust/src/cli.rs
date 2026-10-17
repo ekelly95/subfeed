@@ -305,7 +305,18 @@ fn install_timer() -> Result<()> {
     systemctl(&["enable", "--now", &format!("{UNIT}.timer")])?;
     println!("Installed: subfeed checks for new videos every 30 minutes; on battery it only reads the RSS feeds ({}).", dir.display());
     println!("Runs {}; reinstall if you move it. Remove with: subfeed --uninstall-timer", exe.display());
+    if in_build_tree(&exe) {
+        println!(
+            "Note: that's a build folder, so a failed rebuild or a clean stops the timer. \
+             Install first (cmake --install build --prefix ~/.local) and run the installed subfeed --install-timer."
+        );
+    }
     Ok(())
+}
+
+/// Whether `exe` sits in a CMake build folder rather than an installed location.
+fn in_build_tree(exe: &std::path::Path) -> bool {
+    exe.parent().is_some_and(|dir| dir.join("CMakeCache.txt").is_file())
 }
 
 fn uninstall_timer() -> Result<()> {
@@ -317,4 +328,18 @@ fn uninstall_timer() -> Result<()> {
     systemctl(&["daemon-reload"])?;
     println!("Removed the background refresh timer.");
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::in_build_tree;
+
+    #[test]
+    fn build_folders_are_recognised() {
+        let dir = tempfile::tempdir().unwrap();
+        let exe = dir.path().join("subfeed");
+        assert!(!in_build_tree(&exe));
+        std::fs::write(dir.path().join("CMakeCache.txt"), "").unwrap();
+        assert!(in_build_tree(&exe));
+    }
 }

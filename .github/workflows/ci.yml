@@ -61,3 +61,13 @@ jobs:
         run: |
           appstreamcli validate --no-net io.github.ekelly95.Subfeed.metainfo.xml
           desktop-file-validate io.github.ekelly95.Subfeed.desktop
+
+      # CMakeLists.txt, Cargo.toml/Cargo.lock and the metainfo's newest release must agree.
+      - name: Check the version
+        run: ./packaging/check-version.sh
+
+      # Reported, not enforced: qmllint can't see the types from Rust (cxx-qt) and MpvQt, so
+      # most of what it says about them is noise. Read the log for new warnings in changed files.
+      - name: Lint QML
+        continue-on-error: true
+        run: cmake --build build --target subfeed_qmllint

@@ -33,7 +33,7 @@ no autoplay, and Shorts kept in a view of their own. See [PLAN.md](PLAN.md) for 
 - **Flatpak (any distribution):** download `subfeed.flatpak` from the [latest release](https://github.com/ekelly95/subfeed/releases/latest), then
   `flatpak install --user subfeed.flatpak` (it pulls the KDE runtime from Flathub if you don't have it).
   This build keeps its own yt-dlp current; for a new version of subfeed, install the newer file the same way.
-  To build it yourself, see [`packaging/flatpak`](packaging/flatpak).
+  Each release's file is built from [`packaging/flatpak`](packaging/flatpak) by GitHub Actions; to build it yourself, see the manifest's header.
 - **Arch Linux:** a PKGBUILD is in [`packaging/aur`](packaging/aur): `cd packaging/aur && makepkg -si`.
 - **From source:** below.
 

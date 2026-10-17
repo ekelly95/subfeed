@@ -89,6 +89,13 @@
   <content_rating type="oars-1.1" />
 
   <releases>
+    <release version="0.1.2" date="2026-10-17">
+      <description>
+        <p>New videos now arrive on battery too: the background check reads only the RSS feeds while unplugged, and opening the app catches up when the feed is out of date.</p>
+        <p>Refreshing and thumbnail downloads are faster, because the download workers really run side by side.</p>
+        <p>A yt-dlp call that hangs is stopped after two minutes instead of blocking a refresh.</p>
+      </description>
+    </release>
     <release version="0.1.1" date="2026-10-15">
       <description>
         <p>Builds whose yt-dlp is kept current by their store, such as Flathub's, no longer update it themselves.</p>

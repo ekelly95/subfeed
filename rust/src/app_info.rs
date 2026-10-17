@@ -37,6 +37,6 @@ impl Default for AppInfoRust {
 mod tests {
     #[test]
     fn version_matches_cargo() {
-        assert_eq!(env!("CARGO_PKG_VERSION"), "0.1.1");
+        assert_eq!(env!("CARGO_PKG_VERSION"), "0.1.2");
     }
 }

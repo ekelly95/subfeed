@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     parser.setApplicationDescription(QStringLiteral(
         "Distraction-free YouTube subscriptions\n\n"
         "Headless: --import <subscriptions.csv>, --add <channel>..., --remove <id>...,\n"
-        "--refresh [--force] [--no-fallback], --list [N], --channels"));
+        "--refresh [--force] [--no-fallback] [--battery] [--notify], --list [N], --channels"));
     parser.addHelpOption();
     parser.addVersionOption();
     QCommandLineOption smoke(QStringLiteral("smoke"),

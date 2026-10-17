@@ -52,7 +52,7 @@ FocusScope {
 
     function focusGrid() { grid.forceActiveFocus() }
     // For --tour: move the selection like j/k.
-    function moveSelection(step) { grid.move(step) }
+    function moveSelection(step) { grid.moveBy(step) }
 
     // Prefetch: the video the pointer or keyboard has settled on. Launching the app or scrolling
     // past doesn't count, so an idle feed costs no lookups.
@@ -372,7 +372,8 @@ FocusScope {
                 onPointing: (on) => page.settle({ videoId: videoId }, on)
             }
 
-            function move(step) {
+            // Not `move`: GridView already has a `move` transition property.
+            function moveBy(step) {
                 if (count > 0) currentIndex = Math.max(0, Math.min(count - 1, currentIndex + step))
             }
             function current() {
@@ -387,8 +388,8 @@ FocusScope {
                 case Qt.Key_J:
                 case Qt.Key_Down:
                     if (page.heroFocused) { page.heroFocused = false; currentIndex = 0 }
-                    else if (event.key === Qt.Key_J) move(1)
-                    else move(columns)
+                    else if (event.key === Qt.Key_J) moveBy(1)
+                    else moveBy(columns)
                     break
                 case Qt.Key_K:
                 case Qt.Key_Up:
@@ -396,10 +397,10 @@ FocusScope {
                     if ((event.key === Qt.Key_K ? currentIndex === 0 : atTop) && page.hero) {
                         page.heroFocused = true
                         positionViewAtBeginning()
-                    } else move(event.key === Qt.Key_K ? -1 : -columns)
+                    } else moveBy(event.key === Qt.Key_K ? -1 : -columns)
                     break
-                case Qt.Key_Left: if (!page.heroFocused) move(-1); break
-                case Qt.Key_Right: if (!page.heroFocused) move(1); break
+                case Qt.Key_Left: if (!page.heroFocused) moveBy(-1); break
+                case Qt.Key_Right: if (!page.heroFocused) moveBy(1); break
                 case Qt.Key_Return:
                 case Qt.Key_Enter:
                     if (v) page.playRequested(v)
@@ -408,7 +409,7 @@ FocusScope {
                     if (page.heroFocused) page.feed.setHeroWatched(true)
                     else if (v) {
                         page.feed.setWatched(currentIndex, !v.watched)
-                        if (!v.watched) move(1)
+                        if (!v.watched) moveBy(1)
                     }
                     break
                 case Qt.Key_H:

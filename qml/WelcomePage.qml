@@ -1,9 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Templates as T
 import QtQuick.Dialogs
 import QtCore
-import org.kde.kirigami as Kirigami
 import dev.subfeed.core
 
 // First run (no channels yet): import a Google Takeout export, or add channels by hand.
@@ -103,7 +101,7 @@ FocusScope {
                             spacing: 14
                             Rectangle {
                                 Layout.alignment: Qt.AlignTop
-                                width: 24; height: 24; radius: 12
+                                Layout.preferredWidth: 24; Layout.preferredHeight: 24; radius: 12
                                 color: Theme.raised
                                 Text {
                                     anchors.centerIn: parent

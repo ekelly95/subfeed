@@ -14,10 +14,12 @@ Headless commands:
   --import <subscriptions.csv>   Add channels from a Google Takeout export (never removes any)
   --add <channel>...             Add channels by @handle, URL, or UC… id
   --remove <UC…id>...            Remove channels and their videos
-  --refresh [--force] [--no-fallback] [--notify]
+  --refresh [--force] [--no-fallback] [--battery] [--notify]
                                  Fetch new videos (--force ignores backoff and metered networks;
-                                 --no-fallback skips yt-dlp; --notify posts a desktop notification)
-  --install-timer                Refresh every 30 minutes in the background (systemd user timer, on AC)
+                                 --no-fallback skips yt-dlp; --battery is the light RSS-only refresh
+                                 used automatically on battery; --notify posts a desktop notification)
+  --install-timer                Refresh every 30 minutes in the background (systemd user timer;
+                                 on battery it only reads the RSS feeds)
   --uninstall-timer              Remove that timer
                                  (In the Flatpak these use the desktop's Background portal instead.)
   --update-yt-dlp                Flatpak: install the latest yt-dlp now (it also updates itself daily)
@@ -91,12 +93,14 @@ fn run(args: &[String]) -> Result<c_int> {
             }
         }
         "--refresh" => {
-            let mut opts = Options::default();
+            // On battery: RSS only (no yt-dlp), which is light enough to run unplugged.
+            let mut opts = Options::for_power();
             let mut notify_new = false;
             for flag in rest {
                 match flag.as_str() {
                     "--force" => opts.force = true,
                     "--no-fallback" => opts.fallback = false,
+                    "--battery" => opts = opts.on_battery(),
                     "--notify" => notify_new = true,
                     other => bail!("unknown --refresh option {other}"),
                 }
@@ -187,6 +191,12 @@ fn refresh_command(mut db: Db, opts: &Options, notify_new: bool) -> Result<c_int
         s.failed,
         s.backing_off
     );
+    if opts.battery {
+        println!("On battery: RSS only.");
+    }
+    if s.deferred > 0 {
+        println!("{} channels' RSS failed; they'll be tried with yt-dlp on AC.", s.deferred);
+    }
     if s.durations_filled > 0 {
         println!("Lengths filled in for {} videos.", s.durations_filled);
     }
@@ -235,17 +245,9 @@ fn background_off() -> Result<()> {
     Ok(())
 }
 
-/// Plugged in, or a machine without a battery.
-fn on_ac() -> bool {
-    let Ok(entries) = std::fs::read_dir("/sys/class/power_supply") else { return true };
-    let read = |p: &std::path::Path, f: &str| std::fs::read_to_string(p.join(f)).unwrap_or_default().trim().to_string();
-    let mains: Vec<_> = entries.flatten().map(|e| e.path()).filter(|p| read(p, "type") == "Mains").collect();
-    mains.is_empty() || mains.iter().any(|p| read(p, "online") == "1")
-}
-
-/// `--background` (the Flatpak's stand-in for the systemd timer): every 30 minutes, when on AC
-/// and the window isn't open (it refreshes itself), refresh with notifications and keep yt-dlp
-/// current. Exits when turned off, or when another one is already running.
+/// `--background` (the Flatpak's stand-in for the systemd timer): every 30 minutes, while the
+/// window isn't open (it refreshes itself), refresh with notifications (RSS only on battery)
+/// and, on AC, keep yt-dlp current. Exits when turned off, or when another one is already running.
 fn background() -> Result<c_int> {
     use zbus::fdo::{RequestNameFlags, RequestNameReply};
     let conn = zbus::blocking::Connection::session().context("connecting to the session bus")?;
@@ -261,11 +263,14 @@ fn background() -> Result<c_int> {
             return Ok(0);
         }
         let window_open = bus.name_has_owner(APP_NAME.try_into()?).unwrap_or(false);
-        if on_ac() && !window_open {
-            if let Err(e) = refresh_command(db, &Options::default(), true) {
+        if !window_open {
+            let opts = Options::for_power();
+            if let Err(e) = refresh_command(db, &opts, true) {
                 eprintln!("subfeed: background refresh: {e:#}");
             }
-            if let Err(e) = ytdlp::auto_update(now(), false) {
+            if !opts.battery
+                && let Err(e) = ytdlp::auto_update(now(), false)
+            {
                 eprintln!("subfeed: updating yt-dlp: {e:#}");
             }
         } else {
@@ -298,7 +303,7 @@ fn install_timer() -> Result<()> {
     std::fs::write(dir.join(format!("{UNIT}.timer")), timer)?;
     systemctl(&["daemon-reload"])?;
     systemctl(&["enable", "--now", &format!("{UNIT}.timer")])?;
-    println!("Installed: subfeed checks for new videos every 30 minutes on AC power ({}).", dir.display());
+    println!("Installed: subfeed checks for new videos every 30 minutes; on battery it only reads the RSS feeds ({}).", dir.display());
     println!("Runs {}; reinstall if you move it. Remove with: subfeed --uninstall-timer", exe.display());
     Ok(())
 }

@@ -94,12 +94,37 @@ pub struct Options {
     /// At most this many channels get their missing video lengths looked up (one yt-dlp call
     /// each) per run; 0 turns it off.
     pub durations: usize,
+    /// On battery: RSS only (a ~40 KB download per channel), no yt-dlp. A channel whose RSS
+    /// fails is left for the next run on AC instead of backing off, so an RSS outage while
+    /// unplugged doesn't delay it for hours once the fallback is available again.
+    pub battery: bool,
 }
 
 impl Default for Options {
     fn default() -> Self {
-        Self { force: false, fallback: true, workers: 4, jitter: true, durations: 10 }
+        Self { force: false, fallback: true, workers: 4, jitter: true, durations: 10, battery: false }
     }
+}
+
+impl Options {
+    /// The default options, made light when the machine is running on battery.
+    pub fn for_power() -> Self {
+        if on_battery() { Self::default().on_battery() } else { Self::default() }
+    }
+
+    /// RSS only: no yt-dlp fallback and no length lookups.
+    pub fn on_battery(self) -> Self {
+        Self { battery: true, fallback: false, durations: 0, ..self }
+    }
+}
+
+/// On battery: a machine with a mains supply that's offline. Machines without one (desktops,
+/// or no /sys access) count as on AC.
+pub fn on_battery() -> bool {
+    let Ok(entries) = std::fs::read_dir("/sys/class/power_supply") else { return false };
+    let read = |p: &std::path::Path, f: &str| std::fs::read_to_string(p.join(f)).unwrap_or_default().trim().to_string();
+    let mains: Vec<_> = entries.flatten().map(|e| e.path()).filter(|p| read(p, "type") == "Mains").collect();
+    !mains.is_empty() && mains.iter().all(|p| read(p, "online") != "1")
 }
 
 #[derive(Debug, Default)]
@@ -112,6 +137,8 @@ pub struct Summary {
     pub unchanged: usize,
     pub via_fallback: usize,
     pub failed: usize,
+    /// On battery: RSS failed and the channel waits for a run on AC (no backoff).
+    pub deferred: usize,
     pub new_videos: usize,
     /// Video lengths filled in from yt-dlp (RSS has none).
     pub durations_filled: usize,
@@ -136,6 +163,8 @@ enum Outcome {
     NotModified,
     Fallback { title: Option<String>, entries: Vec<VideoEntry> },
     Failed(String),
+    /// On battery, RSS failed: try again later, without backing off.
+    Deferred,
 }
 
 struct Shared<'a> {
@@ -174,6 +203,9 @@ impl Shared<'_> {
                 }
             }
         };
+        if self.opts.battery {
+            return Outcome::Deferred;
+        }
         if !self.opts.fallback {
             return Outcome::Failed(rss_err);
         }
@@ -259,6 +291,7 @@ pub fn refresh(db: &mut Db, src: &dyn FeedSource, opts: &Options, now: i64) -> R
                     summary.failed += 1;
                     summary.errors.push((ch.title.clone(), err));
                 }
+                Outcome::Deferred => summary.deferred += 1,
             }
         }
         Ok(())
@@ -446,6 +479,31 @@ mod tests {
         assert!(s.rss_outage);
         assert_eq!(s.via_fallback, 20);
         assert_eq!(src.rss_calls.load(Ordering::Relaxed), OUTAGE_THRESHOLD);
+    }
+
+    #[test]
+    fn on_battery_uses_rss_only() {
+        let battery = || opts().on_battery();
+
+        // RSS works: new videos as usual, but no yt-dlp length lookups.
+        let mut db = db_with(&[FIRESHIP]);
+        let src = Fixtures::without_etag();
+        let s = refresh(&mut db, &src, &battery(), 100).unwrap();
+        assert_eq!((s.updated, s.new_videos, s.durations_filled), (1, 3, 0));
+        assert_eq!(src.tab_calls.load(Ordering::Relaxed), 0);
+
+        // RSS fails: no fallback, no backoff; the channel waits for the next run.
+        let mut db = db_with(&[FIRESHIP]);
+        let src = Fixtures::new(404, true);
+        let s = refresh(&mut db, &src, &battery(), 100).unwrap();
+        assert_eq!((s.deferred, s.failed, s.via_fallback), (1, 0, 0));
+        assert_eq!(src.tab_calls.load(Ordering::Relaxed), 0);
+        let ch = &db.channels().unwrap()[0];
+        assert_eq!((ch.fail_count, ch.retry_after, ch.last_fetch), (0, None, None));
+
+        // Back on AC, the fallback runs at once.
+        let s = refresh(&mut db, &src, &opts(), 101).unwrap();
+        assert_eq!(s.via_fallback, 1);
     }
 
     #[test]

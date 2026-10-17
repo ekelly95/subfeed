@@ -61,7 +61,8 @@ On first run the app offers to import your subscriptions from Google Takeout (Yo
 ```sh
 ./build/subfeed --import ~/Downloads/Takeout/YouTube*/subscriptions/subscriptions.csv
 ./build/subfeed --add @handle https://www.youtube.com/@other
-./build/subfeed --refresh            # --force ignores backoff, --no-fallback skips yt-dlp
+./build/subfeed --refresh            # --force ignores backoff, --no-fallback skips yt-dlp;
+                                     # on battery it reads only the RSS feeds (or say --battery)
 ./build/subfeed --list 20
 ./build/subfeed --channels
 ./build/subfeed --open <video-id>    # start playing a video

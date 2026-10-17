@@ -189,8 +189,7 @@ pub fn timer_units(exe: &Path) -> (String, String) {
     let service = format!(
         "[Unit]\n\
          Description=Check YouTube subscriptions for new videos (subfeed)\n\
-         # Only on mains power; metered connections are skipped by subfeed itself.\n\
-         ConditionACPower=true\n\
+         # subfeed decides itself: RSS only on battery, nothing on metered connections.\n\
          \n\
          [Service]\n\
          Type=oneshot\n\
@@ -257,7 +256,7 @@ mod tests {
     fn units_run_this_binary_on_ac_only() {
         let (service, timer) = timer_units(Path::new("/opt/sub feed/subfeed"));
         assert!(service.contains("ExecStart=\"/opt/sub feed/subfeed\" --refresh --notify"));
-        assert!(service.contains("ConditionACPower=true"));
+        assert!(!service.contains("ConditionACPower"), "battery runs are light, so they aren't skipped");
         assert!(timer.contains("OnUnitActiveSec=30min"));
         assert!(timer.contains("WantedBy=timers.target"));
     }

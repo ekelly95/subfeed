@@ -69,9 +69,14 @@ pub mod qobject {
         fn hide(self: Pin<&mut FeedModel>, row: i32) -> QString;
         #[qinvokable]
         fn unhide(self: Pin<&mut FeedModel>, video_id: &QString);
-        /// Fetches all channels in the background, then reloads.
+        /// Fetches all channels in the background, then reloads. On battery, RSS only.
         #[qinvokable]
         fn refresh(self: Pin<&mut FeedModel>);
+        /// Refreshes when no channel was checked in the last `minutes` (or ever). Returns
+        /// whether it started one.
+        #[qinvokable]
+        #[cxx_name = "refreshIfStale"]
+        fn refresh_if_stale(self: Pin<&mut FeedModel>, minutes: i32) -> bool;
         /// Row of a video id, or -1.
         #[qinvokable]
         #[cxx_name = "rowOf"]
@@ -476,7 +481,7 @@ impl qobject::FeedModel {
         let qt = self.qt_thread();
         std::thread::spawn(move || {
             let result = open_db().and_then(|mut db| {
-                let s = refresh::refresh(&mut db, &HttpSource::new(), &Options::default(), now())?;
+                let s = refresh::refresh(&mut db, &HttpSource::new(), &Options::for_power(), now())?;
                 Ok(refresh_message(&s))
             });
             let _ = qt.queue(move |mut model| {
@@ -487,6 +492,19 @@ impl qobject::FeedModel {
                 model.changed();
             });
         });
+    }
+
+    pub fn refresh_if_stale(self: Pin<&mut Self>, minutes: i32) -> bool {
+        let Some(db) = self.db.as_ref() else { return false };
+        let last = match db.last_fetch() {
+            Ok(last) => last,
+            Err(_) => return false,
+        };
+        if !is_stale(last, now(), minutes) || db.channels().map_or(true, |c| c.is_empty()) {
+            return false;
+        }
+        self.refresh();
+        true
     }
 
     pub fn data(&self, index: &QModelIndex, role: i32) -> QVariant {
@@ -532,6 +550,11 @@ fn row_json(v: &FeedRow, dir: &std::path::Path, now: i64) -> serde_json::Value {
         "isShort": v.is_short,
         "left": left.unwrap_or_default(),
     })
+}
+
+/// Whether the newest check (`last_fetch`) is more than `minutes` old, or never happened.
+fn is_stale(last_fetch: Option<i64>, now: i64, minutes: i32) -> bool {
+    last_fetch.is_none_or(|t| now - t > i64::from(minutes) * 60)
 }
 
 /// Fraction watched, for the progress bar under a thumbnail.
@@ -618,5 +641,17 @@ impl qobject::ChannelModel {
 
     pub fn role_names(&self) -> QHash<QHashPair_i32_QByteArray> {
         role_hash(CHANNEL_ROLES)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::is_stale;
+
+    #[test]
+    fn staleness() {
+        assert!(is_stale(None, 1000, 15), "never checked");
+        assert!(!is_stale(Some(1000 - 15 * 60), 1000, 15), "exactly 15 minutes is fresh");
+        assert!(is_stale(Some(1000 - 15 * 60 - 1), 1000, 15));
     }
 }

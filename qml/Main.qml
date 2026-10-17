@@ -248,12 +248,13 @@ QQC2.ApplicationWindow {
         }
     }
 
-    // While open, check for new videos every 30 minutes (on AC, like the background timer).
+    // While open, check for new videos every 30 minutes, like the background timer (on battery
+    // the Rust side reads only the RSS feeds, with no yt-dlp).
     Timer {
         interval: 30 * 60 * 1000
         repeat: true
-        running: root.screenshotPath === "" && !root.smokeTest
-        onTriggered: if (!SystemInfo.onBattery) feedModel.refresh()
+        running: root.screenshotPath === "" && !root.smokeTest && !root.tour
+        onTriggered: feedModel.refresh()
     }
 
     // The tour: each step's action, then how long to wait before the next (approximate: QML timers
@@ -299,6 +300,8 @@ QQC2.ApplicationWindow {
         ytdlpStatus.check()
         if (startInChannels && !welcome) stack.push(channelsComponent, {}, QQC2.StackView.Immediate)
         if (openVideoId !== "") openById(openVideoId)
+        // Opened after a while away (or after the background timer couldn't run): catch up now.
+        if (!welcome && screenshotPath === "" && !smokeTest && !tour) feedModel.refreshIfStale(15)
     }
 
     Timer {

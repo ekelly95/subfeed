@@ -167,14 +167,13 @@ pub fn install_release(tag: &str) -> Result<()> {
         .to_string();
     let bytes = agent.get(format!("{base}/yt-dlp")).call()?.body_mut().with_config().limit(64 << 20).read_to_vec()?;
 
+    // Checked before anything is written or run.
+    if !sha256_matches(&bytes, &expected) {
+        bail!("the download doesn't match yt-dlp's published checksum");
+    }
     let tmp = dir.join("yt-dlp.download");
     std::fs::write(&tmp, &bytes)?;
     let check = (|| -> Result<()> {
-        let out = Command::new("sha256sum").arg(&tmp).output().context("running sha256sum")?;
-        let actual = String::from_utf8_lossy(&out.stdout).split_whitespace().next().unwrap_or("").to_string();
-        if actual != expected {
-            bail!("the download doesn't match yt-dlp's published checksum");
-        }
         use std::os::unix::fs::PermissionsExt;
         std::fs::set_permissions(&tmp, std::fs::Permissions::from_mode(0o755))?;
         let out = output_with_timeout(Command::new(&tmp).arg("--version"), VERSION_TIMEOUT).context("running the new yt-dlp")?;
@@ -191,6 +190,13 @@ pub fn install_release(tag: &str) -> Result<()> {
     std::fs::rename(&tmp, &dest)?;
     *VERSION.lock().unwrap_or_else(|e| e.into_inner()) = None;
     Ok(())
+}
+
+/// Whether `bytes` hash to `expected_hex` (SHA-256, as in yt-dlp's SHA2-256SUMS; any case).
+fn sha256_matches(bytes: &[u8], expected_hex: &str) -> bool {
+    let digest = ring::digest::digest(&ring::digest::SHA256, bytes);
+    let actual: String = digest.as_ref().iter().map(|b| format!("{b:02x}")).collect();
+    actual.eq_ignore_ascii_case(expected_hex.trim())
 }
 
 /// In the Flatpak: installs a newer yt-dlp when there is one. GitHub is asked at most daily,
@@ -375,6 +381,16 @@ pub fn parse_tab(json: &str, channel_id: &str, now: i64) -> Result<Tab> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn checksums() {
+        // SHA-256 of "abc" (FIPS 180-2's test vector).
+        let abc = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+        assert!(sha256_matches(b"abc", abc));
+        assert!(sha256_matches(b"abc", &abc.to_uppercase()));
+        assert!(!sha256_matches(b"abd", abc));
+        assert!(!sha256_matches(b"abc", ""));
+    }
 
     #[test]
     fn output_with_timeout_returns_output() {

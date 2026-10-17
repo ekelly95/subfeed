@@ -4,9 +4,11 @@
 //! The `/videos` tab never contains Shorts. Its dates come from "3 days ago" text, so they are
 //! marked approximate and replaced by RSS's exact ones whenever RSS works again.
 
+use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::process::{Command, Output, Stdio};
 use std::sync::Mutex;
+use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result, anyhow, bail};
 use serde::Deserialize;
@@ -39,15 +41,52 @@ pub struct Tab {
     pub entries: Vec<VideoEntry>,
 }
 
+/// The longest a yt-dlp call may take. A lookup is ~3 s (~11 s in power-saver, where solving
+/// YouTube's challenge is CPU-bound); this only catches one that hangs on a stalled connection.
+pub(crate) const RUN_TIMEOUT: Duration = Duration::from_secs(120);
+const VERSION_TIMEOUT: Duration = Duration::from_secs(15);
+
+/// Runs `cmd` to completion like `Command::output`, but kills it after `timeout`.
+pub(crate) fn output_with_timeout(cmd: &mut Command, timeout: Duration) -> std::io::Result<Output> {
+    let mut child = cmd.stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped()).spawn()?;
+    // Read both pipes on their own threads, so a chatty child can't fill one and block.
+    let drain = |pipe: Option<Box<dyn Read + Send>>| {
+        std::thread::spawn(move || {
+            let mut buf = Vec::new();
+            if let Some(mut p) = pipe {
+                let _ = p.read_to_end(&mut buf);
+            }
+            buf
+        })
+    };
+    let stdout = drain(child.stdout.take().map(|p| Box::new(p) as _));
+    let stderr = drain(child.stderr.take().map(|p| Box::new(p) as _));
+    let deadline = Instant::now() + timeout;
+    let status = loop {
+        if let Some(status) = child.try_wait()? {
+            break status;
+        }
+        if Instant::now() >= deadline {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::TimedOut,
+                format!("gave up after {} s", timeout.as_secs()),
+            ));
+        }
+        std::thread::sleep(Duration::from_millis(50));
+    };
+    Ok(Output { status, stdout: stdout.join().unwrap_or_default(), stderr: stderr.join().unwrap_or_default() })
+}
+
 pub(crate) fn run(args: &[&str]) -> Result<String> {
-    let out = Command::new(binary())
-        .args(["--no-warnings", "--ignore-config"])
-        .args(args)
-        .output()
-        .map_err(|e| match e.kind() {
-            std::io::ErrorKind::NotFound => anyhow!("yt-dlp isn't installed. Install it from your distribution or github.com/yt-dlp/yt-dlp"),
-            _ => anyhow!("running yt-dlp: {e}"),
-        })?;
+    let mut cmd = Command::new(binary());
+    cmd.args(["--no-warnings", "--ignore-config"]).args(args);
+    let out = output_with_timeout(&mut cmd, RUN_TIMEOUT).map_err(|e| match e.kind() {
+        std::io::ErrorKind::NotFound => anyhow!("yt-dlp isn't installed. Install it from your distribution or github.com/yt-dlp/yt-dlp"),
+        std::io::ErrorKind::TimedOut => anyhow!("yt-dlp didn't answer ({e}); check the connection and try again"),
+        _ => anyhow!("running yt-dlp: {e}"),
+    })?;
     if !out.status.success() {
         let stderr = String::from_utf8_lossy(&out.stderr);
         if stderr.contains("Sign in to confirm") || stderr.contains("not a bot") {
@@ -84,7 +123,7 @@ pub fn version() -> Option<String> {
     let mut cached = VERSION.lock().unwrap_or_else(|e| e.into_inner());
     cached
         .get_or_insert_with(|| {
-            let out = Command::new(binary()).arg("--version").output().ok()?;
+            let out = output_with_timeout(Command::new(binary()).arg("--version"), VERSION_TIMEOUT).ok()?;
             let v = String::from_utf8_lossy(&out.stdout).trim().to_string();
             (out.status.success() && !v.is_empty()).then_some(v)
         })
@@ -138,7 +177,7 @@ pub fn install_release(tag: &str) -> Result<()> {
         }
         use std::os::unix::fs::PermissionsExt;
         std::fs::set_permissions(&tmp, std::fs::Permissions::from_mode(0o755))?;
-        let out = Command::new(&tmp).arg("--version").output().context("running the new yt-dlp")?;
+        let out = output_with_timeout(Command::new(&tmp).arg("--version"), VERSION_TIMEOUT).context("running the new yt-dlp")?;
         let reported = String::from_utf8_lossy(&out.stdout).trim().to_string();
         if !out.status.success() || reported != tag {
             bail!("the new yt-dlp reports {reported:?}, not {tag}");
@@ -336,6 +375,21 @@ pub fn parse_tab(json: &str, channel_id: &str, now: i64) -> Result<Tab> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn output_with_timeout_returns_output() {
+        let out = output_with_timeout(Command::new("sh").args(["-c", "echo out; echo err >&2; exit 3"]), Duration::from_secs(10))
+            .unwrap();
+        assert_eq!((out.status.code(), out.stdout.as_slice(), out.stderr.as_slice()), (Some(3), &b"out\n"[..], &b"err\n"[..]));
+    }
+
+    #[test]
+    fn output_with_timeout_kills_a_hung_child() {
+        let start = Instant::now();
+        let err = output_with_timeout(Command::new("sleep").arg("30"), Duration::from_millis(300)).unwrap_err();
+        assert_eq!(err.kind(), std::io::ErrorKind::TimedOut);
+        assert!(start.elapsed() < Duration::from_secs(5), "didn't wait for the child");
+    }
 
     #[test]
     fn versions() {

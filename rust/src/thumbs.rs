@@ -101,18 +101,22 @@ pub fn fetch_missing(
     std::thread::scope(|s| {
         for _ in 0..workers {
             s.spawn(|| {
-                while let Some((id, url, path)) = queue.lock().unwrap().pop_front() {
+                // Take the next item in its own statement: in `while let`, the lock would be
+                // held through the whole download, and the workers would take turns.
+                loop {
+                    let next = queue.lock().unwrap_or_else(|e| e.into_inner()).pop_front();
+                    let Some((id, url, path)) = next else { break };
                     let ok = download(&agent, &url, &path).is_ok();
                     if ok {
                         on_done(&id, &path);
                     }
-                    let mut c = counts.lock().unwrap();
+                    let mut c = counts.lock().unwrap_or_else(|e| e.into_inner());
                     if ok { c.0 += 1 } else { c.1 += 1 }
                 }
             });
         }
     });
-    counts.into_inner().unwrap()
+    counts.into_inner().unwrap_or_else(|e| e.into_inner())
 }
 
 /// Deletes cached thumbnails for videos no longer in the database. Returns how many.

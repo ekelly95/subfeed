@@ -253,7 +253,11 @@ pub fn refresh(db: &mut Db, src: &dyn FeedSource, opts: &Options, now: i64) -> R
             let tx = tx.clone();
             let (queue, shared) = (&queue, &shared);
             s.spawn(move || {
-                while let Some(ch) = queue.lock().unwrap().pop_front() {
+                // Take the next channel in its own statement: in `while let`, the lock would be
+                // held through the whole fetch, and the workers would take turns.
+                loop {
+                    let next = queue.lock().unwrap_or_else(|e| e.into_inner()).pop_front();
+                    let Some(ch) = next else { break };
                     let outcome = shared.fetch(&ch);
                     if tx.send((ch, outcome)).is_err() {
                         break;
@@ -479,6 +483,31 @@ mod tests {
         assert!(s.rss_outage);
         assert_eq!(s.via_fallback, 20);
         assert_eq!(src.rss_calls.load(Ordering::Relaxed), OUTAGE_THRESHOLD);
+    }
+
+    /// A feed server that takes a while to answer "not modified", to show the workers fetch
+    /// side by side.
+    struct Slow;
+
+    impl FeedSource for Slow {
+        fn rss(&self, _ch: &ChannelRow) -> Result<RssResponse> {
+            std::thread::sleep(Duration::from_millis(150));
+            Ok(RssResponse::NotModified)
+        }
+        fn tab(&self, _channel_id: &str, _now: i64) -> Result<ytdlp::Tab> {
+            bail!("not used")
+        }
+    }
+
+    #[test]
+    fn workers_fetch_in_parallel() {
+        let ids: Vec<String> = (0..8).map(|i| format!("UC{i:022}")).collect();
+        let mut db = db_with(&ids.iter().map(String::as_str).collect::<Vec<_>>());
+        let start = std::time::Instant::now();
+        let s = refresh(&mut db, &Slow, &Options { workers: 4, ..opts() }, 100).unwrap();
+        assert_eq!((s.due, s.unchanged), (8, 8));
+        // 8 × 150 ms is 1.2 s one at a time; four workers take about 0.3 s.
+        assert!(start.elapsed() < Duration::from_millis(900), "took {:?}", start.elapsed());
     }
 
     #[test]
